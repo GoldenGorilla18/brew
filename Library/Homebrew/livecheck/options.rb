@@ -5,34 +5,15 @@ module Homebrew
   module Livecheck
     # Options to modify livecheck's behavior. These primarily come from
     # `livecheck` blocks but they can also be set by livecheck at runtime.
-    class Options
+    class Options < T::Struct
       # Whether to use brewed curl.
-      sig { returns(T.nilable(T::Boolean)) }
-      attr_reader :homebrew_curl
+      const :homebrew_curl, T.nilable(T::Boolean)
 
       # Form data to use when making a `POST` request.
-      sig { returns(T.nilable(T::Hash[T.any(String, Symbol), String])) }
-      attr_reader :post_form
+      const :post_form, T.nilable(T::Hash[T.any(String, Symbol), String])
 
       # JSON data to use when making a `POST` request.
-      sig { returns(T.nilable(T::Hash[T.any(String, Symbol), String])) }
-      attr_reader :post_json
-
-      # @param homebrew_curl whether to use brewed curl
-      # @param post_form form data to use when making a `POST` request
-      # @param post_json JSON data to use when making a `POST` request
-      sig {
-        params(
-          homebrew_curl: T.nilable(T::Boolean),
-          post_form:     T.nilable(T::Hash[T.any(String, Symbol), String]),
-          post_json:     T.nilable(T::Hash[T.any(String, Symbol), String]),
-        ).void
-      }
-      def initialize(homebrew_curl: nil, post_form: nil, post_json: nil)
-        @homebrew_curl = homebrew_curl
-        @post_form = post_form
-        @post_json = post_json
-      end
+      const :post_json, T.nilable(T::Hash[T.any(String, Symbol), String])
 
       # Returns a `Hash` of options that are provided as arguments to `url`.
       sig { returns(T::Hash[Symbol, T.untyped]) }
@@ -44,25 +25,15 @@ module Homebrew
         }
       end
 
-      # Returns a `Hash` of all instance variable values.
-      sig { returns(T::Hash[Symbol, T.untyped]) }
-      def to_h
-        {
-          homebrew_curl:,
-          post_form:,
-          post_json:,
-        }
-      end
-
       # Returns a `Hash` of all instance variables, using `String` keys.
       sig { returns(T::Hash[String, T.untyped]) }
       def to_hash
-        {
-          "homebrew_curl" => @homebrew_curl,
-          "post_form"     => @post_form,
-          "post_json"     => @post_json,
-        }
+        T.let(serialize, T::Hash[String, T.untyped])
       end
+
+      # Returns a `Hash` of all instance variable values.
+      sig { returns(T::Hash[Symbol, T.untyped]) }
+      def to_h = to_hash.transform_keys(&:to_sym)
 
       # Returns a new object formed by merging `other` values with a copy of
       # `self`.
@@ -75,7 +46,7 @@ module Homebrew
         return dup if other.blank?
 
         this_hash = to_h
-        other_hash = other.is_a?(Options) ? other.to_h.compact : other
+        other_hash = other.is_a?(Options) ? other.to_h : other
         return dup if this_hash == other_hash
 
         new_options = this_hash.merge(other_hash)
@@ -93,15 +64,11 @@ module Homebrew
 
       # Whether the object has only default values.
       sig { returns(T::Boolean) }
-      def empty?
-        @homebrew_curl.nil? && @post_form.nil? && @post_json.nil?
-      end
+      def empty? = to_hash.empty?
 
       # Whether the object has any non-default values.
       sig { returns(T::Boolean) }
-      def present?
-        !@homebrew_curl.nil? || !@post_form.nil? || !@post_json.nil?
-      end
+      def present? = !empty?
     end
   end
 end
