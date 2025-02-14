@@ -1,4 +1,4 @@
-// For format details, see https://aka.ms/devcontainer.json.
+gh repo clone Homebrew/brew// For format details, see https://aka.ms/devcontainer.json.
 {
   "name": "Homebrew/brew",
   "image": "ghcr.io/homebrew/brew:master",
